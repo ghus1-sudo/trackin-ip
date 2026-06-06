@@ -175,21 +175,18 @@ def admin():
             }}
 
             #map {{
-                height: 350px;
+                height: 500px;
                 width: 80%;
                 margin: auto;
                 border-radius: 10px;
             }}
 
             .panel {{
-                margin-top: 20px;
+                width: 80%;
+                margin: 20px auto;
                 padding: 15px;
                 background: #222;
-                width: 80%;
-                margin-left: auto;
-                margin-right: auto;
                 border-radius: 10px;
-                text-align: left;
             }}
 
             button {{
@@ -218,8 +215,9 @@ def admin():
             outline:none;
             font-family:Consolas, monospace;
             font-size:16px;
-            padding:10px;
+            padding:12px;
             box-sizing:border-box;
+            border-radius:5px;
         "
     >
 
