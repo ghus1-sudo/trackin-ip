@@ -3,17 +3,15 @@ import os
 import requests
 import bcrypt
 
-app = Flask(__name__)
+app = Flask(__name__) 
 app.secret_key = os.environ.get("SEcRET_KeY")
-
-# 🔐 COLE AQUI O HASH GERADO
 SENHA_HASH = os.environ.get("HAshPasS").encode()
 
 visitas = []
 
-# --------------------
+# -------------------
 # SITE NORMAL
-# --------------------
+# -------------------
 @app.route("/")
 def home():
 
@@ -37,14 +35,7 @@ def home():
     except:
         pass
 
-    # 🔥 LOG NO RENDER (:contentReference[oaicite:0]{index=0})
-    print("====================================")
-    print(f"IP: {ip}")
-    print(f"Cidade: {cidade}")
-    print(f"Estado: {estado}")
-    print(f"País: {pais}")
-    print(f"Operadora: {isp}")
-    print("====================================")
+    print(f"IP: {ip} | {cidade} | {estado} | {pais} | {isp}")
 
     visitas.append({
         "ip": ip,
@@ -59,9 +50,9 @@ def home():
     return "<h1>Site Online</h1>"
 
 
-# --------------------
-# LOGIN ADMIN
-# --------------------
+# -------------------
+# LOGIN
+# -------------------
 @app.route("/admin/login", methods=["GET", "POST"])
 def login():
 
@@ -72,20 +63,20 @@ def login():
             session["logado"] = True
             return redirect("/admin")
         else:
-            return "<h1>Senha incorreta</h1>"
+            return "Senha incorreta"
 
     return """
     <h1>Login Admin</h1>
     <form method="post">
-        <input type="password" name="senha" placeholder="Senha">
-        <button type="submit">Entrar</button>
+        <input name="senha" type="password">
+        <button>Entrar</button>
     </form>
     """
 
 
-# --------------------
-# ADMIN (MAPA)
-# --------------------
+# -------------------
+# ADMIN COM MAPA + COMANDOS
+# -------------------
 @app.route("/admin")
 def admin():
 
@@ -102,10 +93,17 @@ def admin():
             .bindPopup("{v['ip']}<br>{v['cidade']} - {v['estado']}<br>{v['pais']}<br>{v['isp']}");
             """
 
+    comandos = "<br>".join([
+        "TOTAL VISITAS: " + str(len(visitas)),
+        "COMANDO: /clear (ainda não ativo)",
+        "COMANDO: /stats (ainda não ativo)"
+    ])
+
     return f"""
+    <!DOCTYPE html>
     <html>
     <head>
-        <title>Admin</title>
+        <title>Admin Panel</title>
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -114,28 +112,55 @@ def admin():
             body {{
                 font-family: Arial;
                 text-align: center;
+                background: #111;
+                color: white;
             }}
+
             #map {{
-                height: 600px;
-                width: 90%;
+                height: 350px;
+                width: 80%;
                 margin: auto;
+                border-radius: 10px;
+            }}
+
+            .panel {{
+                margin-top: 20px;
+                padding: 15px;
+                background: #222;
+                width: 80%;
+                margin-left: auto;
+                margin-right: auto;
+                border-radius: 10px;
+                text-align: left;
+            }}
+
+            button {{
+                padding: 10px;
+                margin: 5px;
             }}
         </style>
     </head>
 
     <body>
 
-    <h1>Painel Seguro</h1>
-    <p>Total de visitas: {len(visitas)}</p>
-
-    <a href="/admin/logout">Sair</a>
+    <h1>PAINEL ADMIN</h1>
 
     <div id="map"></div>
+
+    <div class="panel">
+        <h3>Comandos / Informações</h3>
+        <p>{comandos}</p>
+
+        <button onclick="alert('Comando futuro')">TESTE COMANDO</button>
+        <button onclick="location.href='/admin/logout'">SAIR</button>
+    </div>
 
     <script>
         var map = L.map('map').setView([0, 0], 2);
 
-        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png').addTo(map);
+        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+            attribution: 'OpenStreetMap'
+        }}).addTo(map);
 
         {markers}
     </script>
@@ -145,9 +170,9 @@ def admin():
     """
 
 
-# --------------------
+# -------------------
 # LOGOUT
-# --------------------
+# -------------------
 @app.route("/admin/logout")
 def logout():
     session.clear()
