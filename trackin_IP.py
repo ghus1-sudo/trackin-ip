@@ -47,7 +47,7 @@ def home():
         "lon": lon
     })
 
-    return "<h1>Site Online</h1>"
+    return "<h1 text-align: center;>Site Online</h1>"
 
 
 # -------------------
