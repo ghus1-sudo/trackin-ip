@@ -205,38 +205,81 @@ def admin():
     <div class="panel">
 
     <input
-        type="text"
-        placeholder=">"
-        style="
-            width:100%;
-            background:black;
-            color:#00ff00;
-            border:none;
-            outline:none;
-            font-family:Consolas, monospace;
-            font-size:16px;
-            padding:12px;
-            box-sizing:border-box;
-            border-radius:5px;
-        "
-    >
+        <div class="panel">
+
+<form method="POST" action="/admin/comando">
+
+<input
+    name="cmd"
+    type="text"
+    autocomplete="off"
+    placeholder=">"
+    style="
+        width:100%;
+        background:black;
+        color:#00ff00;
+        border:none;
+        outline:none;
+        font-family:Consolas, monospace;
+        font-size:16px;
+        padding:12px;
+        box-sizing:border-box;
+        border-radius:5px;
+    "
+>
+
+</form>
 
 </div>
 
     <script>
-        var map = L.map('map').setView([0, 0], 2);
 
-        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
+        var normal = L.tileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        {{
             attribution: 'OpenStreetMap'
-        }}).addTo(map);
+        }}
+        );
 
-        {markers}
-    </script>
+        var satelite = L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        {{
+            attribution: 'Esri'
+        }}
+        );
+
+        var map = L.map('map', {{
+            center: [0, 0],
+            zoom: 2,
+            layers: [satelite]
+        }});
+
+L.control.layers(
+    {
+        "Mapa": normal,
+        "Satélite": satelite
+    }
+).addTo(map);
+
+{markers}
+
+</script>
 
     </body>
     </html>
     """
+@app.route("/admin/comando", methods=["POST"])
+def comando():
 
+    if not session.get("logado"):
+        return redirect("/admin/login")
+
+    cmd = request.form.get("cmd", "").strip().lower()
+
+    if cmd == "/sair":
+        return redirect("/admin/logout")
+
+    return redirect("/admin")
 
 # -------------------
 # LOGOUT
