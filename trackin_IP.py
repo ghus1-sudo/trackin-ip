@@ -206,12 +206,24 @@ def admin():
     <div id="map"></div>
 
     <div class="panel">
-        <h3>Comandos / Informações</h3>
-        <p>{comandos}</p>
 
-        <button onclick="alert('Comando futuro')">TESTE COMANDO</button>
-        <button onclick="location.href='/admin/logout'">SAIR</button>
-    </div>
+    <input
+        type="text"
+        placeholder=">"
+        style="
+            width:100%;
+            background:black;
+            color:#00ff00;
+            border:none;
+            outline:none;
+            font-family:Consolas, monospace;
+            font-size:16px;
+            padding:10px;
+            box-sizing:border-box;
+        "
+    >
+
+</div>
 
     <script>
         var map = L.map('map').setView([0, 0], 2);
