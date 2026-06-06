@@ -35,7 +35,7 @@ def home():
     except:
         pass
     print("===================================================")
-    print(f"IP: {ip}ISP: {isp}")
+    print(f"IP: {ip}")
     print(f"Cidade: {cidade}")
     print(f"Estado: {estado}")
     print(f"País: {pais}")
