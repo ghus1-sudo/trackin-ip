@@ -3,63 +3,54 @@ import requests
 
 app = Flask(__name__)
 
+# "banco" simples em memória (só enquanto o servidor roda)
+visitas = []
+
 @app.route("/")
 def inicio():
 
-    # pega só o IP real (remove proxies do Render)
     ip = request.headers.get("X-Forwarded-For", request.remote_addr).split(",")[0].strip()
 
     try:
-        # API de localização
-        response = requests.get(f"http://ip-api.com/json/{ip}", timeout=5)
-        data = response.json()
+        r = requests.get(f"http://ip-api.com/json/{ip}", timeout=5)
+        data = r.json()
 
-        # valida resposta da API
-        if data.get("status") != "success":
-            cidade = "Desconhecida"
-            pais = "Desconhecido"
-            isp = "Desconhecido"
-        else:
-            cidade = data.get("city", "Desconhecida")
-            pais = data.get("country", "Desconhecido")
-            isp = data.get("isp", "Desconhecido")
+        cidade = data.get("city", "Desconhecida")
+        pais = data.get("country", "Desconhecido")
 
     except:
         cidade = "Erro"
         pais = "Erro"
-        isp = "Erro"
 
-    # 🔥 SÓ LOG (não aparece no site)
-    print("====================================")
-    print(f"IP: {ip}")
-    print(f"Cidade: {cidade}")
-    print(f"País: {pais}")
-    print(f"ISP: {isp}")
-    print("====================================")
+    # salva visita
+    visitas.append({
+        "ip": ip,
+        "cidade": cidade,
+        "pais": pais
+    })
 
-    # site simples
+    print(f"{ip} - {cidade} - {pais}")
+
+    # site normal pro usuário
     return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Site Online</title>
-        <style>
-            body {
-                font-family: Arial;
-                text-align: center;
-                margin-top: 100px;
-            }
-            h1 {
-                color: green;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Site Online</h1>
-        <p>Bem-vindo ao meu site!</p>
-    </body>
-    </html>
+    <h1>Site Online</h1>
+    <p>Bem-vindo!</p>
     """
+
+
+# 🔒 PAINEL SECRETO (só você)
+@app.route("/admin")
+def admin():
+
+    html = "<h1>Mapa de visitantes</h1><ul>"
+
+    for v in visitas:
+        html += f"<li>{v['ip']} - {v['cidade']} - {v['pais']}</li>"
+
+    html += "</ul>"
+
+    return html
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
