@@ -124,8 +124,7 @@ button{
 <body>
 
 <form method="post">
-    <input name="senha" type="password" placeholder="Senha">
-    <button type="submit">Entrar</button>
+    <input name="senha" type="password">
 </form>
 
 </body>
