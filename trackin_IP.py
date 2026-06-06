@@ -35,7 +35,11 @@ def home():
     except:
         pass
     print("===================================================")
-    print(f"IP: {ip}<br>Cidade: {cidade}<br>Estado: {estado}<br>País: {pais}<br>ISP: {isp}")
+    print(f"IP: {ip}ISP: {isp}")
+    print(f"Cidade: {cidade}")
+    print(f"Estado: {estado}")
+    print(f"País: {pais}")
+    print(f"ISP: {isp}")
     print("===================================================")
 
     visitas.append({
