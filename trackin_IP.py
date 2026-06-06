@@ -52,7 +52,26 @@ def home():
         "lon": lon
     })
 
-    return "<h1 style=text-align: center;>Site Online</h1>"
+    return """
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Arial;
+}
+</style>
+</head>
+<body>
+    <h1>Site Online</h1>
+</body>
+</html>
+"""
 
 
 # -------------------
@@ -71,12 +90,47 @@ def login():
             return "Senha incorreta"
 
     return """
-    <h1>Login Admin</h1>
-    <form method="post">
-        <input name="senha" type="password">
-        <button>Entrar</button>
-    </form>
-    """
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Arial;
+}
+
+form{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    width:250px;
+}
+
+input{
+    padding:10px;
+    text-align:center;
+}
+
+button{
+    padding:10px;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<form method="post">
+    <input name="senha" type="password" placeholder="Senha">
+    <button type="submit">Entrar</button>
+</form>
+
+</body>
+</html>
+"""
 
 
 # -------------------
