@@ -1,12 +1,19 @@
-from flask import Flask, request
+from flask import Flask, request, session, redirect
+import os
 import requests
+import bcrypt
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SEcRET_KeY")
+
+# 🔐 COLE AQUI O HASH GERADO
+SENHA_HASH = os.environ.get("HAshPasS").encode()
 
 visitas = []
 
-ADMIN_PASSWORD = "1234"  # 🔐 MUDA ISSO DEPOIS
-
+# --------------------
+# SITE NORMAL
+# --------------------
 @app.route("/")
 def home():
 
@@ -30,7 +37,7 @@ def home():
     except:
         pass
 
-    # 🔥 LOG COMPLETO NO RENDER
+    # 🔥 LOG NO RENDER (:contentReference[oaicite:0]{index=0})
     print("====================================")
     print(f"IP: {ip}")
     print(f"Cidade: {cidade}")
@@ -52,29 +59,38 @@ def home():
     return "<h1>Site Online</h1>"
 
 
-# 🔐 LOGIN SIMPLES ADMIN
+# --------------------
+# LOGIN ADMIN
+# --------------------
+@app.route("/admin/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+        senha = request.form.get("senha").encode()
+
+        if bcrypt.checkpw(senha, SENHA_HASH):
+            session["logado"] = True
+            return redirect("/admin")
+        else:
+            return "<h1>Senha incorreta</h1>"
+
+    return """
+    <h1>Login Admin</h1>
+    <form method="post">
+        <input type="password" name="senha" placeholder="Senha">
+        <button type="submit">Entrar</button>
+    </form>
+    """
+
+
+# --------------------
+# ADMIN (MAPA)
+# --------------------
 @app.route("/admin")
 def admin():
 
-    senha = request.args.get("senha")
-
-    if senha != ADMIN_PASSWORD:
-        return """
-        <h1>Acesso negado</h1>
-        <p>Use /admin?senha=1234</p>
-        """
-
-    return """
-    <h1>Carregando mapa...</h1>
-    <script>
-        setTimeout(() => {
-            location.reload();
-        }, 5000);
-    </script>
-    """ + gerar_mapa()
-
-
-def gerar_mapa():
+    if not session.get("logado"):
+        return redirect("/admin/login")
 
     markers = ""
 
@@ -89,7 +105,7 @@ def gerar_mapa():
     return f"""
     <html>
     <head>
-        <title>Admin Map</title>
+        <title>Admin</title>
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -109,17 +125,17 @@ def gerar_mapa():
 
     <body>
 
-    <h1>Mapa em Tempo Real</h1>
+    <h1>Painel Seguro</h1>
     <p>Total de visitas: {len(visitas)}</p>
+
+    <a href="/admin/logout">Sair</a>
 
     <div id="map"></div>
 
     <script>
         var map = L.map('map').setView([0, 0], 2);
 
-        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png', {{
-            attribution: 'OpenStreetMap'
-        }}).addTo(map);
+        L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png').addTo(map);
 
         {markers}
     </script>
@@ -127,6 +143,15 @@ def gerar_mapa():
     </body>
     </html>
     """
+
+
+# --------------------
+# LOGOUT
+# --------------------
+@app.route("/admin/logout")
+def logout():
+    session.clear()
+    return redirect("/admin/login")
 
 
 if __name__ == "__main__":
