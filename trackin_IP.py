@@ -3,45 +3,78 @@ import requests
 
 app = Flask(__name__)
 
-# guarda visitas (enquanto o servidor estiver ligado)
 visitas = []
+
+ADMIN_PASSWORD = "1234"  # 🔐 MUDA ISSO DEPOIS
 
 @app.route("/")
 def home():
 
     ip = request.headers.get("X-Forwarded-For", request.remote_addr).split(",")[0].strip()
 
+    cidade = estado = pais = isp = "Desconhecido"
+    lat = lon = None
+
     try:
         r = requests.get(f"http://ip-api.com/json/{ip}", timeout=5)
         data = r.json()
 
-        cidade = data.get("city", "Desconhecida")
-        pais = data.get("country", "Desconhecido")
-        lat = data.get("lat")
-        lon = data.get("lon")
+        if data.get("status") == "success":
+            cidade = data.get("city")
+            estado = data.get("regionName")
+            pais = data.get("country")
+            isp = data.get("isp")
+            lat = data.get("lat")
+            lon = data.get("lon")
 
     except:
-        cidade = pais = "Erro"
-        lat = lon = None
+        pass
 
-    print(f"VISITA: {ip} | {cidade} | {pais}")
+    # 🔥 LOG COMPLETO NO RENDER
+    print("====================================")
+    print(f"IP: {ip}")
+    print(f"Cidade: {cidade}")
+    print(f"Estado: {estado}")
+    print(f"País: {pais}")
+    print(f"Operadora: {isp}")
+    print("====================================")
 
     visitas.append({
         "ip": ip,
         "cidade": cidade,
+        "estado": estado,
         "pais": pais,
+        "isp": isp,
         "lat": lat,
         "lon": lon
     })
 
-    return """
-    <h1>Site Online</h1>
-    <p>Bem-vindo!</p>
-    """
+    return "<h1>Site Online</h1>"
 
 
+# 🔐 LOGIN SIMPLES ADMIN
 @app.route("/admin")
 def admin():
+
+    senha = request.args.get("senha")
+
+    if senha != ADMIN_PASSWORD:
+        return """
+        <h1>Acesso negado</h1>
+        <p>Use /admin?senha=1234</p>
+        """
+
+    return """
+    <h1>Carregando mapa...</h1>
+    <script>
+        setTimeout(() => {
+            location.reload();
+        }, 5000);
+    </script>
+    """ + gerar_mapa()
+
+
+def gerar_mapa():
 
     markers = ""
 
@@ -50,14 +83,13 @@ def admin():
             markers += f"""
             L.marker([{v['lat']}, {v['lon']}])
             .addTo(map)
-            .bindPopup("{v['ip']}<br>{v['cidade']} - {v['pais']}");
+            .bindPopup("{v['ip']}<br>{v['cidade']} - {v['estado']}<br>{v['pais']}<br>{v['isp']}");
             """
 
     return f"""
-    <!DOCTYPE html>
     <html>
     <head>
-        <title>Admin</title>
+        <title>Admin Map</title>
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -68,7 +100,7 @@ def admin():
                 text-align: center;
             }}
             #map {{
-                height: 500px;
+                height: 600px;
                 width: 90%;
                 margin: auto;
             }}
@@ -77,7 +109,7 @@ def admin():
 
     <body>
 
-    <h1>Painel de Visitas</h1>
+    <h1>Mapa em Tempo Real</h1>
     <p>Total de visitas: {len(visitas)}</p>
 
     <div id="map"></div>
@@ -95,6 +127,7 @@ def admin():
     </body>
     </html>
     """
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
