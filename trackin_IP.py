@@ -3,54 +3,37 @@ import requests
 
 app = Flask(__name__)
 
-# "banco" simples em memória (só enquanto o servidor roda)
-visitas = []
-
 @app.route("/")
-def inicio():
+def home():
 
+    # pega IP real (Render usa proxy)
     ip = request.headers.get("X-Forwarded-For", request.remote_addr).split(",")[0].strip()
+
+    cidade = "Desconhecida"
+    pais = "Desconhecido"
 
     try:
         r = requests.get(f"http://ip-api.com/json/{ip}", timeout=5)
         data = r.json()
 
-        cidade = data.get("city", "Desconhecida")
-        pais = data.get("country", "Desconhecido")
+        if data.get("status") == "success":
+            cidade = data.get("city", "Desconhecida")
+            pais = data.get("country", "Desconhecido")
 
     except:
-        cidade = "Erro"
-        pais = "Erro"
+        pass
 
-    # salva visita
-    visitas.append({
-        "ip": ip,
-        "cidade": cidade,
-        "pais": pais
-    })
+    # 🔥 SÓ LOG (NÃO aparece no site)
+    print("===================================")
+    print(f"IP: {ip}")
+    print(f"Cidade: {cidade}")
+    print(f"País: {pais}")
+    print("===================================")
 
-    print(f"{ip} - {cidade} - {pais}")
-
-    # site normal pro usuário
     return """
     <h1>Site Online</h1>
     <p>Bem-vindo!</p>
     """
-
-
-# 🔒 PAINEL SECRETO (só você)
-@app.route("/admin")
-def admin():
-
-    html = "<h1>Mapa de visitantes</h1><ul>"
-
-    for v in visitas:
-        html += f"<li>{v['ip']} - {v['cidade']} - {v['pais']}</li>"
-
-    html += "</ul>"
-
-    return html
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
