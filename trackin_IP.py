@@ -255,10 +255,10 @@ def admin():
         }});
 
 L.control.layers(
-    {
+    {{
         "Mapa": normal,
         "Satélite": satelite
-    }
+    }}
 ).addTo(map);
 
 {markers}
