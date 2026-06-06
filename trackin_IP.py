@@ -263,14 +263,6 @@ L.control.layers(
 
 {markers}
 
-<script>
-window.onload = function() {{
-    if (document.documentElement.requestFullscreen) {{
-        document.documentElement.requestFullscreen().catch(() => {{}});
-    }}
-}};
-</script>
-
 </script>
 
     </body>
