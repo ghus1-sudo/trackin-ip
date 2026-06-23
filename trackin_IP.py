@@ -157,6 +157,19 @@ def admin():
         "COMANDO: /stats (ainda não ativo)"
     ])
 
+    lista_visitas = ""
+
+    for v in reversed(visitas):
+        lista_visitas += f"""
+        <tr>
+            <td>{v['ip']}</td>
+            <td>{v['cidade']}</td>
+            <td>{v['estado']}</td>
+            <td>{v['pais']}</td>
+            <td>{v['isp']}</td>
+        </tr>
+        """
+
     return f"""
     <!DOCTYPE html>
     <html>
@@ -193,6 +206,19 @@ def admin():
                 padding: 10px;
                 margin: 5px;
             }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+            }}
+
+            th, td {{
+                border: 1px solid #444;
+                padding: 10px;
+            }}
+
+            th {{
+                background: #333;
+            }}
         </style>
     </head>
 
@@ -204,7 +230,28 @@ def admin():
 
     <div class="panel">
 
-    <input
+    <h2>Visitas</h2>
+
+    <table style="
+        width:100%;
+        border-collapse:collapse;
+        text-align:center;
+        ">
+
+        <tr>
+            <th>IP</th>
+            <th>Cidade</th>
+            <th>Estado</th>
+            <th>País</th>
+            <th>Operadora</th>
+        </tr>
+
+        {lista_visitas}
+
+        </table>
+
+        </div>
+
         <div class="panel">
 
 <form method="POST" action="/admin/comando">
