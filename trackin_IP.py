@@ -124,7 +124,15 @@ button{
 <body>
 
 <form method="post">
-    <input name="senha" type="password">
+    <input
+    name="cmd"
+    type="text"
+    autocomplete="off"
+    placeholder=">"
+>
+
+<button type="submit">Enviar</button>
+
 </form>
 
 </body>
